@@ -155,11 +155,16 @@ func (ctl *controller) updateFunc(oldObj interface{}, newObj interface{}) {
 	}
 
 	shoot, err := extensioncontroller.ShootFromCluster(ctl.decoder, newCluster)
+	if shoot == nil {
+		_ = level.Error(ctl.logger).Log("msg", fmt.Sprintf("%v is not a shoot", newCluster))
+	}
 	if err != nil {
 		metrics.Errors.WithLabelValues(metrics.ErrorCanNotExtractShoot).Inc()
 		_ = level.Error(ctl.logger).Log("msg", fmt.Sprintf("can't extract shoot from cluster %v", newCluster.Name))
 		return
 	}
+
+	fmt.Printf("\nShoot:%s\n", string(oldCluster.Spec.Shoot.Raw))
 
 	if bytes.Equal(oldCluster.Spec.Shoot.Raw, newCluster.Spec.Shoot.Raw) &&
 		shoot.Status.LastOperation.Progress == 100 &&
