@@ -167,18 +167,17 @@ func (ctl *controller) updateFunc(oldObj interface{}, newObj interface{}) {
 	fmt.Printf("\nShoot.Raw:%s\n", string(newCluster.Spec.Shoot.Raw))
 	fmt.Printf("\nShoot:%v\n", shoot)
 
-	newoldequal:=bytes.Equal(oldCluster.Spec.Shoot.Raw, newCluster.Spec.Shoot.Raw)
-	if newoldequal{
-		if shoot.Status==nil{
-			_ = level.Error(ctl.logger).Log("msg", fmt.Sprintf("shoot.status is nil %v", shoot))
-		}
-		if shoot.Status.LastOperation==nil{
+	newoldequal := bytes.Equal(oldCluster.Spec.Shoot.Raw, newCluster.Spec.Shoot.Raw)
+	if newoldequal {
+		if shoot.Status.LastOperation == nil {
 			_ = level.Error(ctl.logger).Log("msg", fmt.Sprintf("shoot.status.lastOp is nil %v", shoot))
+			return
 		}
 		if shoot.Status.LastOperation.Progress == 100 &&
-		(shoot.Status.LastOperation.Type == gardenercorev1beta1.LastOperationTypeReconcile || shoot.Status.LastOperation.Type == gardenercorev1beta1.LastOperationTypeCreate) {
-		_ = level.Debug(ctl.logger).Log("msg", fmt.Sprintf("return from the informer update callback %v", newCluster.Name))
-		return
+			(shoot.Status.LastOperation.Type == gardenercorev1beta1.LastOperationTypeReconcile || shoot.Status.LastOperation.Type == gardenercorev1beta1.LastOperationTypeCreate) {
+			_ = level.Debug(ctl.logger).Log("msg", fmt.Sprintf("return from the informer update callback %v", newCluster.Name))
+			return
+		}
 	}
 
 	_ = level.Info(ctl.logger).Log("msg", fmt.Sprintf("reconciling %v", newCluster.Name))
